@@ -62,14 +62,14 @@ class DataTableStruct:
         # 4) 본문 데이터 추출
         self.rawData = [row[rowHeadersNumber:] for row in dataTable[columnHeadersNumber:]]
 
-        # 5) 검색용 튜플 변환 (원본 헤더의 다단 구조 유지)
-        if self.rowHeaders:
+        # 5) PureTable 모드일 때만 검색용 라벨 생성
+        if self.use_pure_table and self.rowHeaders:
             self.rowHeaders_showTable = [tuple(r) for r in self.rowHeaders]
         else:
             self.rowHeaders_showTable = None
 
-        if self.columnHeaders:
-            transposed = list(zip(*self.columnHeaders))  # 각 열에 대해 tuple 생성
+        if self.use_pure_table and self.columnHeaders:
+            transposed = list(zip(*self.columnHeaders))
             self.columnHeaders_showTable = [tuple(c) for c in transposed]
         else:
             self.columnHeaders_showTable = None
@@ -125,7 +125,7 @@ class DataTableStruct:
         """
         # 개별 항목을 처리하는 내부 함수 (PureTable 라벨 변환 적용)
         def process_row_item(item):
-            if isinstance(item, str) and len(item) == 1 and item.isdigit() and self.rowHeaders_showTable:
+            if self.use_pure_table and isinstance(item, str) and len(item) == 1 and item.isdigit() and self.rowHeaders_showTable:
                 idx = int(item) - 1
                 if 0 <= idx < len(self.rowHeaders_showTable):
                     t = self.rowHeaders_showTable[idx]
@@ -133,7 +133,7 @@ class DataTableStruct:
             return item
 
         def process_col_item(item):
-            if isinstance(item, str) and len(item) == 1 and item.upper() in string.ascii_uppercase and self.columnHeaders_showTable:
+            if self.use_pure_table and isinstance(item, str) and len(item) == 1 and item.upper() in string.ascii_uppercase and self.columnHeaders_showTable:
                 idx = ord(item.upper()) - ord('A')
                 if 0 <= idx < len(self.columnHeaders_showTable):
                     t = self.columnHeaders_showTable[idx]
